@@ -44,9 +44,15 @@ const RecoveryCode = mongoose.model("RecoveryCode", recoverySchema)
 // ===============================
 app.post('/request-reset', async (req, res) => {
   try {
-    const { email } = req.body
+    // 🔍 LOG CLAVE
+    console.log("BODY REQUEST-RESET:", req.body)
+
+    let { email } = req.body
 
     if (!email) return res.json({ success: false })
+
+    // 🔧 NORMALIZACIÓN (solo agregado)
+    email = email.trim().toLowerCase()
 
     await RecoveryCode.deleteMany({ email })
 
@@ -59,18 +65,18 @@ app.post('/request-reset', async (req, res) => {
       expiresAt
     })
 
- await resend.emails.send({
-   from: "Monetix <onboarding@resend.dev>",
-   to: email,
-   subject: "Recuperación de PIN - Monetix",
-   html: `
-     <h2>Recuperación de PIN</h2>
-     <p>Tu código de recuperación es:</p>
-     <h1>${code}</h1>
-     <p>Este código vence en 10 minutos.</p>
-   `
- })
-
+    // ❌ EMAIL COMENTADO A PROPÓSITO (no tocar)
+    // await resend.emails.send({
+    //   from: "Monetix <onboarding@resend.dev>",
+    //   to: email,
+    //   subject: "Recuperación de PIN - Monetix",
+    //   html: `
+    //     <h2>Recuperación de PIN</h2>
+    //     <p>Tu código de recuperación es:</p>
+    //     <h1>${code}</h1>
+    //     <p>Este código vence en 10 minutos.</p>
+    //   `
+    // })
 
     res.json({ success: true })
 
@@ -85,9 +91,16 @@ app.post('/request-reset', async (req, res) => {
 // ===============================
 app.post('/verify-reset', async (req, res) => {
   try {
-    const { email, code } = req.body
+    // 🔍 LOG CLAVE
+    console.log("BODY VERIFY-RESET:", req.body)
+
+    let { email, code } = req.body
 
     if (!email || !code) return res.json({ success: false })
+
+    // 🔧 NORMALIZACIÓN (solo agregado)
+    email = email.trim().toLowerCase()
+    code = code.trim()
 
     const record = await RecoveryCode.findOne({ email, code })
 
